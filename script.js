@@ -63,52 +63,6 @@ function applyTheme() {
     document.body.className = cls;
 }
 
-function restartMatrixIfNeeded() {
-    if (animationsEnabled) {
-        stopMatrix();
-        initMatrix();
-    } else {
-        stopMatrix();
-    }
-}
-
-function getMatrixColors() {
-    const themes = {
-        cyberpunk: {
-            dark: { head: 'rgba(0, 212, 255, 0.95)', trail: 'rgba(0, 140, 255, 0.6)' },
-            light: { head: 'rgba(0, 100, 180, 0.85)', trail: 'rgba(0, 136, 204, 0.4)' }
-        },
-        matrix: {
-            dark: { head: 'rgba(180, 255, 180, 0.95)', trail: 'rgba(0, 255, 65, 0.6)' },
-            light: { head: 'rgba(0, 100, 40, 0.85)', trail: 'rgba(0, 153, 51, 0.4)' }
-        },
-        hacker: {
-            dark: { head: 'rgba(255, 120, 120, 0.95)', trail: 'rgba(255, 34, 34, 0.6)' },
-            light: { head: 'rgba(180, 30, 30, 0.85)', trail: 'rgba(204, 34, 34, 0.4)' }
-        }
-    };
-    const mode = isLightMode ? 'light' : 'dark';
-    return themes[currentTheme] ? themes[currentTheme][mode] : themes.cyberpunk[mode];
-}
-
-(function() {
-    const saved = localStorage.getItem('abxspeed-theme');
-    const savedLight = localStorage.getItem('abxspeed-light');
-    const savedAnim = localStorage.getItem('abxspeed-anim');
-    if (saved && THEMES[saved]) currentTheme = saved;
-    if (savedLight === '1') isLightMode = true;
-    if (savedAnim !== null) animationsEnabled = savedAnim === '1';
-    applyTheme();
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.querySelector('.theme-btn[data-theme="' + currentTheme + '"]');
-    if (activeBtn) activeBtn.classList.add('active');
-    document.getElementById('themeLabel').textContent = THEMES[currentTheme].label + (isLightMode ? ' (Light)' : ' (Dark)');
-
-    if (animationsEnabled) {
-        initMatrix();
-    }
-})();
-
 /* ================================================================
    MATRIX RAIN ENGINE
    ================================================================ */
@@ -187,6 +141,52 @@ document.addEventListener('visibilitychange', function() {
         drawMatrix();
     }
 });
+
+function restartMatrixIfNeeded() {
+    if (animationsEnabled) {
+        stopMatrix();
+        initMatrix();
+    } else {
+        stopMatrix();
+    }
+}
+
+function getMatrixColors() {
+    const themes = {
+        cyberpunk: {
+            dark: { head: 'rgba(0, 212, 255, 0.95)', trail: 'rgba(0, 140, 255, 0.6)' },
+            light: { head: 'rgba(0, 100, 180, 0.85)', trail: 'rgba(0, 136, 204, 0.4)' }
+        },
+        matrix: {
+            dark: { head: 'rgba(180, 255, 180, 0.95)', trail: 'rgba(0, 255, 65, 0.6)' },
+            light: { head: 'rgba(0, 100, 40, 0.85)', trail: 'rgba(0, 153, 51, 0.4)' }
+        },
+        hacker: {
+            dark: { head: 'rgba(255, 120, 120, 0.95)', trail: 'rgba(255, 34, 34, 0.6)' },
+            light: { head: 'rgba(180, 30, 30, 0.85)', trail: 'rgba(204, 34, 34, 0.4)' }
+        }
+    };
+    const mode = isLightMode ? 'light' : 'dark';
+    return themes[currentTheme] ? themes[currentTheme][mode] : themes.cyberpunk[mode];
+}
+
+(function() {
+    const saved = localStorage.getItem('abxspeed-theme');
+    const savedLight = localStorage.getItem('abxspeed-light');
+    const savedAnim = localStorage.getItem('abxspeed-anim');
+    if (saved && THEMES[saved]) currentTheme = saved;
+    if (savedLight === '1') isLightMode = true;
+    if (savedAnim !== null) animationsEnabled = savedAnim === '1';
+    applyTheme();
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector('.theme-btn[data-theme="' + currentTheme + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+    document.getElementById('themeLabel').textContent = THEMES[currentTheme].label + (isLightMode ? ' (Light)' : ' (Dark)');
+
+    if (animationsEnabled) {
+        initMatrix();
+    }
+})();
 
 /* ================================================================
    SPEED TEST LOGIC
