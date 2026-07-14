@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="ABxSPEED - Browser-based network speed test. Measure download, upload, and ping with zero dependencies.">
+<meta name="theme-color" content="#0a0a1a">
+<title>ABxSPEED - Network Speed Test</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#00f0ff;--accent:#ff00ff;--bg:#0a0a1a;--surface:#1a1a2e;
+  --surface2:#12121f;--text:#ffffff;--text2:#8888aa;--success:#00ff88;
+  --warning:#ffaa00;--danger:#ff4466;--radius:12px;--glow:0 0 20px rgba(0,240,255,.3);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.6}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 20% 50%,rgba(0,240,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(255,0,255,.05) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(0,255,136,.03) 0%,transparent 50%);pointer-events:none;z-index:0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--surface)}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
+
+/* Layout */
+.container{max-width:900px;margin:0 auto;padding:16px;position:relative;z-index:1}
+
+/* Header */
+header{text-align:center;padding:24px 0 16px;position:relative;z-index:1}
+.logo{font-size:clamp(28px,6vw,48px);font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block}
+.logo span{font-size:.5em;vertical-align:super;color:var(--accent);-webkit-text-fill-color:var(--accent)}
+.tagline{color:var(--text2);font-size:clamp(12px,2.5vw,16px);margin-top:4px;letter-spacing:1px}
+
+/* Nav */
+.nav{display:flex;justify-content:center;gap:8px;margin:16px 0;flex-wrap:wrap}
+.nav-btn{background:var(--surface);border:1px solid rgba(0,240,255,.2);color:var(--text);padding:8px 16px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .3s;font-family:inherit}
+.nav-btn:hover,.nav-btn.active{background:rgba(0,240,255,.15);border-color:var(--primary);box-shadow:var(--glow)}
+
+/* Connection Badge */
+.conn-badge{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;background:var(--surface);border:1px solid rgba(0,240,255,.15);border-radius:var(--radius);margin-bottom:20px;font-size:14px}
+.conn-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.conn-dot.wifi{background:var(--success)}
+.conn-dot.mobile{background:var(--warning)}
+.conn-dot.unknown{background:var(--danger)}
+
+/* Speed Gauge */
+.gauge-wrap{text-align:center;padding:20px 0}
+.gauge-svg{width:min(380px,85vw);height:auto}
+.gauge-value{font-size:clamp(32px,8vw,56px);font-weight:900;color:var(--primary);margin-top:-10px;text-shadow:0 0 30px rgba(0,240,255,.4)}
+.gauge-unit{font-size:clamp(14px,3vw,20px);color:var(--text2);font-weight:400}
+.gauge-phase{font-size:clamp(12px,2.5vw,16px);color:var(--accent);margin-top:8px;letter-spacing:2px;text-transform:uppercase}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.card{background:var(--surface);border:1px solid rgba(0,240,255,.1);border-radius:var(--radius);padding:20px 16px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--primary),transparent);opacity:0;transition:opacity .3s}
+.card:hover::before,.card.active::before{opacity:1}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.card-icon{font-size:28px;margin-bottom:8px}
+.card-title{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:4px}
+.card-value{font-size:clamp(22px,5vw,32px);font-weight:800;color:var(--primary)}
+.card-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.card-score{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.score-poor{background:rgba(255,68,102,.2);color:var(--danger)}
+.score-fair{background:rgba(255,170,0,.2);color:var(--warning)}
+.score-good{background:rgba(0,255,136,.2);color:var(--success)}
+.score-great{background:rgba(0,240,255,.2);color:var(--primary)}
+.score-excellent{background:rgba(0,128,255,.2);color:#4488ff}
+.score-ultra{background:rgba(255,0,255,.2);color:var(--accent)}
+
+/* Overall Score */
+.overall{text-align:center;padding:24px;background:var(--surface);border:1px solid rgba(0,240,255,.1);border-radius:var(--radius);margin:20px 0;display:none}
+.overall.show{display:block;animation:fadeUp .5s ease}
+.overall-score{font-size:clamp(48px,10vw,72px);font-weight:900;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.overall-label{font-size:18px;color:var(--text2);margin-top:4px}
+.overall-rating{font-size:clamp(16px,3vw,22px);font-weight:700;margin-top:8px}
+
+/* Start Button */
+.start-btn{display:block;width:100%;max-width:320px;margin:0 auto 20px;padding:16px;font-size:18px;font-weight:700;font-family:inherit;border:2px solid var(--primary);background:transparent;color:var(--primary);border-radius:var(--radius);cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:2px;position:relative;overflow:hidden}
+.start-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,240,255,.2),transparent);transition:left .5s}
+.start-btn:hover::before{left:100%}
+.start-btn:hover{background:rgba(0,240,255,.1);box-shadow:var(--glow)}
+.start-btn:disabled{opacity:.5;cursor:not-allowed}
+.start-btn.running{border-color:var(--accent);color:var(--accent)}
+
+/* History */
+.history-section{margin:20px 0;display:none}
+.history-section.show{display:block;animation:fadeUp .5s ease}
+.section-title{font-size:18px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title span{color:var(--primary)}
+.history-actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.history-actions button{padding:6px 14px;font-size:12px;font-family:inherit;border:1px solid rgba(0,240,255,.2);background:var(--surface);color:var(--text);border-radius:6px;cursor:pointer;transition:all .3s}
+.history-actions button:hover{border-color:var(--primary);background:rgba(0,240,255,.1)}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);color:var(--primary);padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid rgba(0,240,255,.05);white-space:nowrap}
+tr:hover td{background:rgba(0,240,255,.03)}
+.empty-state{text-align:center;padding:30px;color:var(--text2);font-size:14px}
+
+/* Footer */
+footer{text-align:center;padding:20px 0;color:var(--text2);font-size:12px;border-top:1px solid rgba(0,240,255,.1);margin-top:30px}
+footer a{color:var(--primary);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* Modals */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid rgba(0,240,255,.2);border-radius:var(--radius);padding:28px;max-width:420px;width:100%;transform:translateY(20px);transition:transform .3s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal h3{font-size:20px;margin-bottom:12px;color:var(--primary)}
+.modal p{color:var(--text2);font-size:14px;margin-bottom:16px;line-height:1.6}
+.modal-btns{display:flex;gap:10px;flex-wrap:wrap}
+.modal-btns button{flex:1;padding:10px 16px;font-size:14px;font-family:inherit;border:1px solid rgba(0,240,255,.3);background:var(--surface2);color:var(--text);border-radius:8px;cursor:pointer;transition:all .3s;min-width:100px}
+.modal-btns button:hover{border-color:var(--primary);background:rgba(0,240,255,.1)}
+.modal-btns .btn-primary{background:rgba(0,240,255,.15);border-color:var(--primary);color:var(--primary)}
+.modal-btns .btn-accent{background:rgba(255,0,255,.15);border-color:var(--accent);color:var(--accent)}
+
+/* Progress */
+.progress-bar{width:100%;height:4px;background:var(--surface2);border-radius:2px;margin:12px 0;overflow:hidden;display:none}
+.progress-bar.show{display:block}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:2px;transition:width .3s;width:0%}
+
+/* Theme toggle */
+.theme-toggle{position:fixed;top:16px;right:16px;z-index:50;width:40px;height:40px;border-radius:50%;background:var(--surface);border:1px solid rgba(0,240,255,.2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .3s}
+.theme-toggle:hover{border-color:var(--primary);box-shadow:var(--glow)}
+
+/* Light theme */
+body.light{--bg:#f0f2f5;--surface:#ffffff;--surface2:#e8eaed;--text:#1a1a2e;--text2:#666688}
+body.light::before{background:radial-gradient(ellipse at 20% 50%,rgba(0,100,200,.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(100,0,200,.04) 0%,transparent 50%)}
+body.light .card{border-color:rgba(0,100,200,.1)}
+body.light .card:hover{box-shadow:0 8px 30px rgba(0,0,0,.08)}
+body.light .modal{border-color:rgba(0,100,200,.2)}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 8px rgba(0,240,255,.4))}50%{filter:drop-shadow(0 0 16px rgba(0,240,255,.7))}}
+
+/* Responsive */
+@media(max-width:768px){
+  .cards{grid-template-columns:1fr;gap:12px}
+  .card{padding:16px 12px}
+  .card-value{font-size:24px}
+  .history-section{font-size:12px}
+  .nav{gap:4px}
+  .nav-btn{padding:6px 12px;font-size:12px}
+}
+@media(max-width:480px){
+  .container{padding:10px}
+  .gauge-wrap{padding:10px 0}
+}
+
+/* Spinner */
+.spinner{width:40px;height:40px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:20px auto}
+
+/* Share buttons */
+.share-row{display:flex;gap:8px;margin-top:12px;justify-content:center;flex-wrap:wrap}
+.share-row button{padding:6px 14px;font-size:12px;font-family:inherit;border:1px solid rgba(0,240,255,.2);background:var(--surface2);color:var(--text);border-radius:6px;cursor:pointer;transition:all .3s}
+.share-row button:hover{border-color:var(--primary);background:rgba(0,240,255,.1)}
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+<div class="container">
+  <header>
+    <div class="logo">ABxSPEED<span>v1</span></div>
+    <div class="tagline">Browser Network Speed Test</div>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showSection('test')">Speed Test</button>
+    <button class="nav-btn" onclick="showSection('history')">History</button>
+  </nav>
+
+  <div class="conn-badge">
+    <span class="conn-dot" id="connDot"></span>
+    <span id="connLabel">Detecting connection...</span>
+  </div>
+
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div id="testSection">
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 400 240" id="gaugeSvg">
+        <defs>
+          <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ff4466"/>
+            <stop offset="20%" stop-color="#ff8844"/>
+            <stop offset="40%" stop-color="#ffaa00"/>
+            <stop offset="55%" stop-color="#00ff88"/>
+            <stop offset="75%" stop-color="#00f0ff"/>
+            <stop offset="90%" stop-color="#4488ff"/>
+            <stop offset="100%" stop-color="#ff00ff"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Background arc -->
+        <path d="M 40 210 A 160 160 0 0 1 360 210" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="20" stroke-linecap="round"/>
+        <!-- Colored arc -->
+        <path d="M 40 210 A 160 160 0 0 1 360 210" fill="none" stroke="url(#gaugeGrad)" stroke-width="20" stroke-linecap="round" stroke-dasharray="471" stroke-dashoffset="471" id="gaugeArc"/>
+        <!-- Tick marks -->
+        <g id="ticks" stroke="rgba(255,255,255,.15)" stroke-width="1"></g>
+        <!-- Labels -->
+        <g id="tickLabels" fill="rgba(255,255,255,.3)" font-size="10" text-anchor="middle"></g>
+        <!-- Needle -->
+        <g id="needle" filter="url(#glow)">
+          <line x1="200" y1="210" x2="200" y2="70" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90,200,210)" id="needleLine"/>
+          <circle cx="200" cy="210" r="6" fill="var(--primary)"/>
+          <circle cx="200" cy="210" r="3" fill="var(--bg)"/>
+        </g>
+      </svg>
+      <div class="gauge-value" id="gaugeValue">0<span class="gauge-unit"> Mbps</span></div>
+      <div class="gauge-phase" id="gaugePhase">Ready</div>
+    </div>
+
+    <div class="cards">
+      <div class="card" id="pingCard">
+        <div class="card-icon">📡</div>
+        <div class="card-title">Ping</div>
+        <div class="card-value" id="pingValue">—</div>
+        <div class="card-sub" id="pingSub">ms avg</div>
+        <div class="card-score" id="pingScore" style="display:none"></div>
+      </div>
+      <div class="card" id="downloadCard">
+        <div class="card-icon">⬇️</div>
+        <div class="card-title">Download</div>
+        <div class="card-value" id="downloadValue">—</div>
+        <div class="card-sub" id="downloadSub">Mbps</div>
+        <div class="card-score" id="downloadScore" style="display:none"></div>
+      </div>
+      <div class="card" id="uploadCard">
+        <div class="card-icon">⬆️</div>
+        <div class="card-title">Upload</div>
+        <div class="card-value" id="uploadValue">—</div>
+        <div class="card-sub" id="uploadSub">Mbps</div>
+        <div class="card-score" id="uploadScore" style="display:none"></div>
+      </div>
+    </div>
+
+    <div class="overall" id="overallResult">
+      <div class="overall-score" id="overallScore">0</div>
+      <div class="overall-label">Overall Score</div>
+      <div class="overall-rating" id="overallRating"></div>
+      <div class="share-row">
+        <button onclick="copyResults()">📋 Copy Results</button>
+        <button onclick="shareResults('twitter')">Twitter</button>
+        <button onclick="shareResults('whatsapp')">WhatsApp</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn" onclick="startTest()">▶ Start Speed Test</button>
+  </div>
+
+  <div class="history-section" id="historySection">
+    <div class="section-title"><span>📊</span> Test History</div>
+    <div class="history-actions">
+      <button onclick="exportHistory()">Export JSON</button>
+      <button onclick="clearHistory()">Clear All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Connection</th><th>Ping</th><th>Download</th><th>Upload</th><th>Score</th></tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="6" class="empty-state">No tests yet. Run a speed test to see results here.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p>ABxSPEED v1.0 &mdash; Zero-dependency browser speed test</p>
+    <p>Made by <a href="https://github.com/ABsUPs" target="_blank" rel="noopener">ABsUP</a></p>
+  </footer>
+</div>
+
+<!-- Mobile Data Warning Modal -->
+<div class="modal-overlay" id="mobileModal">
+  <div class="modal">
+    <h3>⚠️ Mobile Data Detected</h3>
+    <p>This test may use approximately <strong>~56 MB</strong> of mobile data for a full test (ping + download + upload).</p>
+    <p>Consider using WiFi for the most accurate results and to avoid data charges.</p>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="proceedTest(false)">Run Full Test</button>
+      <button onclick="proceedTest(true)">Lightweight Only</button>
+      <button onclick="cancelTest()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Connection Selection Modal -->
+<div class="modal-overlay" id="connModal">
+  <div class="modal">
+    <h3>🔌 Connection Type</h3>
+    <p>Could not auto-detect your connection type. Please select:</p>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="selectConn('wifi')">WiFi</button>
+      <button onclick="selectConn('mobile')">Mobile Data</button>
+      <button onclick="selectConn('unknown')">Unknown</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ===== State ===== */
+const state = {
+  connectionType: 'unknown',
+  running: false,
+  lightweight: false,
+  results: { ping: null, download: null, upload: null, score: null },
+  theme: localStorage.getItem('abx_theme') || 'dark',
+  animFrame: null
+};
+
+/* ===== Theme ===== */
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  localStorage.setItem('abx_theme', state.theme);
+}
+function applyTheme() {
+  document.body.classList.toggle('light', state.theme === 'light');
+  document.querySelector('.theme-toggle').textContent = state.theme === 'dark' ? '🌙' : '☀️';
+}
+applyTheme();
+
+/* ===== Navigation ===== */
+function showSection(which) {
+  document.getElementById('testSection').style.display = which === 'test' ? 'block' : 'none';
+  document.getElementById('historySection').className = which === 'history' ? 'history-section show' : 'history-section';
+  document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && which === 'test') || (i === 1 && which === 'history')));
+  if (which === 'history') renderHistory();
+}
+
+/* ===== Connection Detection ===== */
+function detectConnection() {
+  const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  let type = 'unknown';
+  if (conn) {
+    const et = (conn.effectiveType || '').toLowerCase();
+    if (et.includes('wifi') || et.includes('ethernet')) type = 'wifi';
+    else if (et.includes('4g') || et.includes('3g') || et.includes('2g') || et.includes('slow-2g')) type = 'mobile';
+    else if (conn.type) {
+      type = conn.type === 'wifi' ? 'wifi' : conn.type.includes('cellular') ? 'mobile' : 'unknown';
+    }
+  }
+  if (type === 'unknown') {
+    const ua = navigator.userAgent || '';
+    if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) type = 'mobile';
+    else type = 'wifi';
+  }
+  state.connectionType = type;
+  updateConnBadge(type);
+  return type;
+}
+function updateConnBadge(type) {
+  const dot = document.getElementById('connDot');
+  const label = document.getElementById('connLabel');
+  dot.className = 'conn-dot ' + type;
+  const labels = { wifi: 'WiFi Connected', mobile: 'Mobile Data', unknown: 'Connection Unknown' };
+  label.textContent = labels[type] || 'Unknown';
+}
+
+/* ===== Gauge ===== */
+const GAUGE_TICKS = [0, 10, 50, 100, 500, 1000, 10000];
+const GAUGE_MAX_MBPS = 10000;
+const ARC_LENGTH = 471;
+let currentAngle = -90;
+let targetAngle = -90;
+let currentMbps = 0;
+
+function initGauge() {
+  const ticksG = document.getElementById('ticks');
+  const labelsG = document.getElementById('tickLabels');
+  ticksG.innerHTML = '';
+  labelsG.innerHTML = '';
+  GAUGE_TICKS.forEach((mbps) => {
+    const frac = mbpsToFraction(mbps);
+    const angle = -90 + frac * 180;
+    const rad = angle * Math.PI / 180;
+    const cx = 200, cy = 210, r1 = 150, r2 = 162;
+    const x1 = cx + r1 * Math.cos(rad), y1 = cy + r1 * Math.sin(rad);
+    const x2 = cx + r2 * Math.cos(rad), y2 = cy + r2 * Math.sin(rad);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    ticksG.appendChild(line);
+    const lr = 172;
+    const lx = cx + lr * Math.cos(rad), ly = cy + lr * Math.sin(rad);
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', lx); text.setAttribute('y', ly);
+    text.setAttribute('dominant-baseline', 'middle');
+    text.textContent = mbps >= 1000 ? (mbps / 1000) + 'G' : mbps;
+    labelsG.appendChild(text);
+  });
+}
+
+function mbpsToFraction(mbps) {
+  if (mbps === 0) return 0;
+  const logMin = Math.log10(1);
+  const logMax = Math.log10(GAUGE_MAX_MBPS);
+  const logVal = Math.log10(Math.max(1, mbps));
+  return Math.min(1, Math.max(0, (logVal - logMin) / (logMax - logMin)));
+}
+
+function updateGauge(mbps) {
+  const frac = mbpsToFraction(mbps);
+  const angle = -90 + frac * 180;
+  targetAngle = angle;
+  currentMbps = mbps;
+}
+
+function animateGauge() {
+  const diff = targetAngle - currentAngle;
+  if (Math.abs(diff) > 0.5) {
+    currentAngle += diff * 0.15;
+  } else {
+    currentAngle = targetAngle;
+  }
+  const needle = document.getElementById('needleLine');
+  needle.setAttribute('transform', `rotate(${currentAngle},200,210)`);
+  const frac = (currentAngle + 90) / 180;
+  const arcOffset = ARC_LENGTH * (1 - frac);
+  document.getElementById('gaugeArc').setAttribute('stroke-dashoffset', arcOffset);
+  const display = currentMbps >= 1000 ? (currentMbps / 1000).toFixed(2) : currentMbps.toFixed(1);
+  document.getElementById('gaugeValue').innerHTML = display + '<span class="gauge-unit"> Mbps</span>';
+  state.animFrame = requestAnimationFrame(animateGauge);
+}
+
+function startGaugeAnimation() {
+  currentAngle = -90;
+  targetAngle = -90;
+  currentMbps = 0;
+  if (state.animFrame) cancelAnimationFrame(state.animFrame);
+  animateGauge();
+}
+function stopGaugeAnimation() {
+  if (state.animFrame) { cancelAnimationFrame(state.animFrame); state.animFrame = null; }
+}
+
+/* ===== Scoring ===== */
+function scorePing(ms) {
+  if (ms <= 0) return 100;
+  return Math.max(0, Math.round(100 - (ms / 200) * 100));
+}
+function scoreDownload(mbps) {
+  if (mbps >= 1000) return 100;
+  if (mbps >= 500) return 85 + 15 * ((mbps - 500) / 500);
+  if (mbps >= 100) return 65 + 20 * ((mbps - 100) / 400);
+  if (mbps >= 25) return 40 + 25 * ((mbps - 25) / 75);
+  if (mbps >= 5) return 15 + 25 * ((mbps - 5) / 20);
+  return Math.round((mbps / 5) * 15);
+}
+function scoreUpload(mbps) {
+  if (mbps >= 500) return 100;
+  if (mbps >= 100) return 80 + 20 * ((mbps - 100) / 400);
+  if (mbps >= 20) return 55 + 25 * ((mbps - 20) / 80);
+  if (mbps >= 5) return 30 + 25 * ((mbps - 5) / 15);
+  if (mbps >= 1) return 10 + 20 * ((mbps - 1) / 4);
+  return Math.round((mbps / 1) * 10);
+}
+function overallScore(pingS, dlS, ulS) {
+  return Math.round(pingS * 0.3 + dlS * 0.4 + ulS * 0.3);
+}
+function scoreClass(s) {
+  if (s >= 90) return ['score-ultra', 'Ultra'];
+  if (s >= 75) return ['score-excellent', 'Excellent'];
+  if (s >= 60) return ['score-great', 'Great'];
+  if (s >= 40) return ['score-good', 'Good'];
+  if (s >= 20) return ['score-fair', 'Fair'];
+  return ['score-poor', 'Poor'];
+}
+
+/* ===== Speed Rating ===== */
+function speedRating(dlMbps, ulMbps, pingMs) {
+  if (dlMbps > 1000) return '⚡ Gigabit+';
+  if (dlMbps >= 500) return '🚀 Ultra Fast';
+  if (dlMbps >= 100) return '🔥 Very Fast';
+  if (dlMbps >= 25) return '✅ Fast';
+  if (dlMbps >= 5) return '📡 Average';
+  if (dlMbps >= 1) return '🐌 Slow';
+  return '❌ Very Slow';
+}
+
+/* ===== Ping Test ===== */
+async function runPingTest(iterations = 10) {
+  const pings = [];
+  const urls = [
+    'https://www.google.com/favicon.ico',
+    'https://cdn.jsdelivr.net/favicon.ico',
+    'https://www.cloudflare.com/favicon.ico'
+  ];
+  for (let i = 0; i < iterations; i++) {
+    const url = urls[i % urls.length] + '?cb=' + Date.now() + i;
+    try {
+      const start = performance.now();
+      await fetch(url, { mode: 'no-cors', cache: 'no-store' });
+      const elapsed = performance.now() - start;
+      pings.push(elapsed);
+    } catch {
+      pings.push(999);
+    }
+    updateCardValue('pingValue', (pings[pings.length - 1]).toFixed(0) + ' ms');
+    setProgress(((i + 1) / iterations) * 100);
+  }
+  pings.sort((a, b) => a - b);
+  const min = pings[0];
+  const avg = pings.reduce((a, b) => a + b, 0) / pings.length;
+  const jitter = pings.length > 1 ? pings.slice(1).reduce((s, p, i) => s + Math.abs(p - pings[i]), 0) / (pings.length - 1) : 0;
+  return { min: Math.round(min), avg: Math.round(avg * 10) / 10, jitter: Math.round(jitter * 10) / 10 };
+}
+
+/* ===== Download Test ===== */
+async function runDownloadTest(lightweight = false) {
+  const tiers = lightweight ? [1] : [1, 5, 10, 25, 50, 100];
+  let bestSpeed = 0;
+  let testDataSize = 0;
+  for (const sizeMB of tiers) {
+    const url = `https://speed.cloudflare.com/download?bytes=${sizeMB * 1024 * 1024}&r=${Date.now()}`;
+    try {
+      const start = performance.now();
+      const resp = await fetch(url);
+      if (!resp.ok) continue;
+      const reader = resp.body.getReader();
+      let received = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.byteLength;
+        const elapsed = (performance.now() - start) / 1000;
+        const mbps = (received * 8) / (elapsed * 1000000);
+        if (mbps > bestSpeed) bestSpeed = mbps;
+        updateGauge(mbps);
+        testDataSize = received;
+      }
+      const elapsed = (performance.now() - start) / 1000;
+      const mbps = (received * 8) / (elapsed * 1000000);
+      if (mbps > bestSpeed) bestSpeed = mbps;
+      updateCardValue('downloadValue', mbps >= 1000 ? (mbps / 1000).toFixed(2) + ' Gbps' : mbps.toFixed(1) + ' Mbps');
+    } catch {
+      continue;
+    }
+    if (!lightweight && bestSpeed > 0) {
+      const nextTier = tiers[tiers.indexOf(sizeMB) + 1];
+      if (!nextTier) break;
+    }
+  }
+  return { mbps: Math.round(bestSpeed * 100) / 100, sizeMB: Math.round(testDataSize / (1024 * 1024)) };
+}
+
+/* ===== Upload Test ===== */
+async function runUploadTest(lightweight = false) {
+  const tiers = lightweight ? [1] : [1, 2, 5, 10];
+  let bestSpeed = 0;
+  for (const sizeMB of tiers) {
+    const chunkSize = sizeMB * 1024 * 1024;
+    const data = new Uint8Array(chunkSize);
+    for (let i = 0; i < chunkSize; i += 65536) {
+      crypto.getRandomValues(data.subarray(i, Math.min(i + 65536, chunkSize)));
+    }
+    try {
+      const start = performance.now();
+      await fetch('https://httpbin.org/post', {
+        method: 'POST',
+        body: data,
+        headers: { 'Content-Type': 'application/octet-stream' }
+      });
+      const elapsed = (performance.now() - start) / 1000;
+      const mbps = (chunkSize * 8) / (elapsed * 1000000);
+      if (mbps > bestSpeed) bestSpeed = mbps;
+      updateGauge(mbps);
+      updateCardValue('uploadValue', mbps >= 1000 ? (mbps / 1000).toFixed(2) + ' Gbps' : mbps.toFixed(1) + ' Mbps');
+    } catch {
+      continue;
+    }
+  }
+  return Math.round(bestSpeed * 100) / 100;
+}
+
+/* ===== UI Helpers ===== */
+function updateCardValue(id, text) { document.getElementById(id).textContent = text; }
+function setProgress(pct) { document.getElementById('progressFill').style.width = pct + '%'; }
+function setPhase(text) { document.getElementById('gaugePhase').textContent = text; }
+function showCard(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; }
+function setCardActive(id, active) { document.getElementById(id).classList.toggle('active', active); }
+
+function showScore(id, score) {
+  const el = document.getElementById(id);
+  const [cls, label] = scoreClass(score);
+  el.className = 'card-score ' + cls;
+  el.textContent = score + '/100 ' + label;
+  el.style.display = 'inline-block';
+}
+
+/* ===== Main Test ===== */
+async function startTest() {
+  if (state.running) return;
+  const connType = detectConnection();
+  if (connType === 'mobile') {
+    document.getElementById('mobileModal').classList.add('show');
+    return;
+  }
+  if (connType === 'unknown') {
+    document.getElementById('connModal').classList.add('show');
+    return;
+  }
+  runTestFlow(connType);
+}
+
+function proceedTest(lightweight) {
+  document.getElementById('mobileModal').classList.remove('show');
+  state.lightweight = lightweight;
+  runTestFlow(state.connectionType);
+}
+function cancelTest() {
+  document.getElementById('mobileModal').classList.remove('show');
+}
+function selectConn(type) {
+  document.getElementById('connModal').classList.remove('show');
+  state.connectionType = type;
+  updateConnBadge(type);
+  runTestFlow(type);
+}
+
+async function runTestFlow(connType) {
+  state.running = true;
+  const btn = document.getElementById('startBtn');
+  btn.textContent = '⏳ Testing...';
+  btn.classList.add('running');
+  btn.disabled = true;
+  document.getElementById('progressBar').classList.add('show');
+  setProgress(0);
+  startGaugeAnimation();
+
+  ['pingValue', 'downloadValue', 'uploadValue'].forEach(id => updateCardValue(id, '—'));
+  ['pingScore', 'downloadScore', 'uploadScore'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('overallResult').className = 'overall';
+
+  try {
+    setPhase('Testing Ping...');
+    setCardActive('pingCard', true);
+    const ping = await runPingTest(10);
+    setCardActive('pingCard', false);
+    updateCardValue('pingValue', ping.avg + ' ms');
+    updateCardValue('pingSub', `min ${ping.min}ms · jitter ${ping.jitter}ms`);
+    const pingS = scorePing(ping.avg);
+    showScore('pingScore', pingS);
+    state.results.ping = ping;
+
+    setPhase('Testing Download...');
+    setCardActive('downloadCard', true);
+    const dl = await runDownloadTest(state.lightweight);
+    setCardActive('downloadCard', false);
+    const dlDisplay = dl.mbps >= 1000 ? (dl.mbps / 1000).toFixed(2) + ' Gbps' : dl.mbps.toFixed(1) + ' Mbps';
+    updateCardValue('downloadValue', dlDisplay);
+    updateCardValue('downloadSub', `Tested ${(dl.sizeMB * 2).toFixed(0)} MB`);
+    const dlS = scoreDownload(dl.mbps);
+    showScore('downloadScore', dlS);
+    state.results.download = { mbps: dl.mbps, display: dlDisplay };
+
+    setPhase('Testing Upload...');
+    setCardActive('uploadCard', true);
+    const ulMbps = await runUploadTest(state.lightweight);
+    setCardActive('uploadCard', false);
+    const ulDisplay = ulMbps >= 1000 ? (ulMbps / 1000).toFixed(2) + ' Gbps' : ulMbps.toFixed(1) + ' Mbps';
+    updateCardValue('uploadValue', ulDisplay);
+    const ulS = scoreUpload(ulMbps);
+    showScore('uploadScore', ulS);
+    state.results.upload = { mbps: ulMbps, display: ulDisplay };
+
+    const overall = overallScore(pingS, dlS, ulS);
+    const [ratingCls, ratingLabel] = scoreClass(overall);
+    document.getElementById('overallScore').textContent = overall + '/100';
+    document.getElementById('overallRating').textContent = speedRating(dl.mbps, ulMbps, ping.avg) + ' — ' + ratingLabel;
+    document.getElementById('overallRating').className = 'overall-rating ' + ratingCls;
+    document.getElementById('overallResult').className = 'overall show';
+    state.results.score = overall;
+
+    updateGauge(0);
+    setPhase('Complete');
+    saveHistory(connType, ping.avg, dl.mbps, ulMbps, overall);
+
+  } catch (err) {
+    setPhase('Error — ' + err.message);
+  }
+
+  state.running = false;
+  btn.textContent = '▶ Start Speed Test';
+  btn.classList.remove('running');
+  btn.disabled = false;
+  setTimeout(() => { stopGaugeAnimation(); }, 2000);
+  setTimeout(() => { document.getElementById('progressBar').classList.remove('show'); }, 1000);
+}
+
+/* ===== History ===== */
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('abx_history') || '[]'); }
+  catch { return []; }
+}
+function saveHistory(connType, pingMs, dlMbps, ulMbps, score) {
+  const h = getHistory();
+  h.unshift({ date: new Date().toISOString(), conn: connType, ping: pingMs, dl: dlMbps, ul: ulMbps, score });
+  if (h.length > 50) h.length = 50;
+  localStorage.setItem('abx_history', JSON.stringify(h));
+}
+function renderHistory() {
+  const h = getHistory();
+  const tbody = document.getElementById('historyBody');
+  if (!h.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No tests yet. Run a speed test to see results here.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = h.map(e => {
+    const d = new Date(e.date);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const connIcon = e.conn === 'wifi' ? '📶' : e.conn === 'mobile' ? '📱' : '❓';
+    const dlStr = e.dl >= 1000 ? (e.dl / 1000).toFixed(2) + ' Gbps' : e.dl.toFixed(1) + ' Mbps';
+    const ulStr = e.ul >= 1000 ? (e.ul / 1000).toFixed(2) + ' Gbps' : e.ul.toFixed(1) + ' Mbps';
+    const [, rLabel] = scoreClass(e.score);
+    return `<tr><td>${dateStr}</td><td>${connIcon} ${e.conn}</td><td>${e.ping} ms</td><td>${dlStr}</td><td>${ulStr}</td><td>${e.score}/100 ${rLabel}</td></tr>`;
+  }).join('');
+}
+function exportHistory() {
+  const h = getHistory();
+  const blob = new Blob([JSON.stringify(h, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'abxspeed-history.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function clearHistory() {
+  if (confirm('Clear all test history?')) {
+    localStorage.removeItem('abx_history');
+    renderHistory();
+  }
+}
+
+/* ===== Share ===== */
+function copyResults() {
+  const r = state.results;
+  if (!r.ping) return;
+  const text = `ABxSPEED Test Results\nPing: ${r.ping.avg} ms\nDownload: ${r.download.display}\nUpload: ${r.upload.display}\nOverall Score: ${r.score}/100`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-row button');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy Results', 2000);
+  });
+}
+function shareResults(platform) {
+  const r = state.results;
+  if (!r.ping) return;
+  const text = `ABxSPEED: Ping ${r.ping.avg}ms | DL ${r.download.display} | UL ${r.upload.display} | Score ${r.score}/100`;
+  const url = 'https://abspeed.pages.dev';
+  if (platform === 'twitter') {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+  } else if (platform === 'whatsapp') {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+  }
+}
+
+/* ===== Init ===== */
+initGauge();
+detectConnection();
+</script>
+</body>
+</html>
