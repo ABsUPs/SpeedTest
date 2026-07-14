@@ -15,7 +15,7 @@
     --text-secondary: #8888aa;
     --border: rgba(255, 255, 255, 0.1);
     --gauge-alt: #0088ff;
-    --grid-opacity: 0.03;
+    --grid-opacity: 0.06;
     --grid-color: 0, 212, 255;
     --logo-grad-a: var(--accent);
     --logo-grad-b: #00ff88;
@@ -64,7 +64,7 @@
     --text-secondary: #994444;
     --border: rgba(255, 34, 34, 0.12);
     --gauge-alt: #cc0000;
-    --grid-opacity: 0.025;
+    --grid-opacity: 0.05;
     --grid-color: 255, 34, 34;
     --logo-grad-a: #ff2222;
     --logo-grad-b: #ff8800;
@@ -140,6 +140,10 @@
 
 .light-mode #matrixCanvas { display: none !important; }
 .light-mode .hacker-scanlines { display: none !important; }
+.light-mode .hacker-sweep { display: none !important; }
+.light-mode .hacker-flicker { display: none !important; }
+.light-mode .cyber-pulse { display: none !important; }
+.light-mode .cyber-scanline { display: none !important; }
 
 /* ========== ANIMATIONS TOGGLE ========== */
 .anim-toggle {
@@ -185,6 +189,10 @@
 }
 .no-animations #matrixCanvas { display: none !important; }
 .no-animations .hacker-scanlines { display: none !important; }
+.no-animations .hacker-sweep { display: none !important; }
+.no-animations .hacker-flicker { display: none !important; }
+.no-animations .cyber-pulse { display: none !important; }
+.no-animations .cyber-scanline { display: none !important; }
 .no-animations .card:hover { box-shadow: none; border-color: var(--border); transition: none; }
 .no-animations .detect-btn:hover { transform: none; transition: none; }
 .no-animations .detect-btn.testing { animation: none; }
@@ -225,13 +233,39 @@ body {
         0deg,
         transparent,
         transparent 2px,
-        rgba(255, 34, 34, 0.015) 2px,
-        rgba(255, 34, 34, 0.015) 4px
+        rgba(255, 34, 34, 0.04) 2px,
+        rgba(255, 34, 34, 0.04) 4px
     );
     pointer-events: none; z-index: 0; display: none;
 }
 .theme-hacker .hacker-scanlines { display: block; }
 
+.hacker-sweep {
+    position: fixed; top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(180deg, transparent, rgba(255, 34, 34, 0.15), transparent);
+    pointer-events: none; z-index: 0; display: none;
+    animation: sweep 4s linear infinite;
+}
+.theme-hacker .hacker-sweep { display: block; }
+
+@keyframes sweep {
+    0% { top: -6px; }
+    100% { top: 100vh; }
+}
+
+.hacker-flicker {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; display: none;
+    animation: flicker 8s ease-in-out infinite;
+}
+.theme-hacker .hacker-flicker { display: block; }
+
+@keyframes flicker {
+    0%, 92%, 94%, 100% { background: transparent; }
+    93% { background: rgba(255, 34, 34, 0.03); }
+}
+
+/* ========== CYBERPUNK GRID ANIMATION ========== */
 .bg-grid {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image:
@@ -239,6 +273,36 @@ body {
         linear-gradient(90deg, rgba(var(--grid-color, 0, 212, 255), var(--grid-opacity)) 1px, transparent 1px);
     background-size: 50px 50px;
     pointer-events: none; z-index: 0;
+}
+
+.cyber-pulse {
+    position: fixed; top: 50%; left: 50%;
+    width: 600px; height: 600px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    pointer-events: none; z-index: 0; display: none;
+    animation: cyberPulse 6s ease-in-out infinite;
+}
+.theme-cyberpunk .cyber-pulse { display: block; }
+
+@keyframes cyberPulse {
+    0%, 100% { box-shadow: 0 0 80px 20px rgba(0, 212, 255, 0.03); }
+    50% { box-shadow: 0 0 120px 40px rgba(0, 212, 255, 0.07); }
+}
+
+.cyber-scanline {
+    position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+    pointer-events: none; z-index: 0; display: none;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.12), transparent);
+    animation: cyberScan 5s linear infinite;
+}
+.theme-cyberpunk .cyber-scanline { display: block; }
+
+@keyframes cyberScan {
+    0% { top: -2px; opacity: 0; }
+    5% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { top: 100vh; opacity: 0; }
 }
 
 /* ========== THEME TOGGLE ========== */
