@@ -2,20 +2,44 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Latest  | :white_check_mark: |
+
+Only the latest deployed version at [abspeed.pages.dev](https://abspeed.pages.dev) is supported with security updates.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security vulnerability in ABxSPEED, please report it responsibly.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+**How to report:**
+- Open an issue at [github.com/ABsUPs/SpeedTest/issues](https://github.com/ABsUPs/SpeedTest/issues)
+- Or email the maintainer via [ABsUP on GitHub](https://github.com/ABsUPs)
+
+**What to include:**
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+
+**What to expect:**
+- Acknowledgment within 48 hours
+- Assessment and update within 7 days
+- Credit in the fix commit unless anonymity is requested
+
+## Scope
+
+ABxSPEED is a client-side only speed test tool with no backend, no user accounts, and no data collection. Security concerns are limited to:
+- Cross-site scripting (XSS)
+- Content Security Policy bypasses
+- Insecure resource loading
+
+## Security Headers
+
+The following headers are enforced on all responses:
+- `Strict-Transport-Security` (HSTS with preload)
+- `Content-Security-Policy` (restrictive policy)
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` (camera, microphone, geolocation disabled)
