@@ -74,7 +74,7 @@ let mColumns = [];
 let mFontSize = 14;
 let mAnimId = null;
 
-const MATRIX_CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*آبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی٠١٢٣٤٥٦٧٨٩';
+const MATRIX_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
 
 function initMatrix() {
     if (!matrixInited) {
