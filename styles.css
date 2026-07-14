@@ -138,12 +138,36 @@
     --grid-color: 180, 30, 30;
 }
 
-.light-mode #matrixCanvas { display: none !important; }
-.light-mode .hacker-scanlines { display: none !important; }
-.light-mode .hacker-sweep { display: none !important; }
-.light-mode .hacker-flicker { display: none !important; }
-.light-mode .cyber-pulse { display: none !important; }
-.light-mode .cyber-scanline { display: none !important; }
+/* ========== LIGHT MODE ANIMATION OVERRIDES ========== */
+.light-mode .hacker-scanlines {
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(204, 34, 34, 0.03) 2px,
+        rgba(204, 34, 34, 0.03) 4px
+    );
+}
+.light-mode .hacker-sweep {
+    background: linear-gradient(180deg, transparent, rgba(204, 34, 34, 0.1), transparent);
+}
+.light-mode .hacker-flicker {
+    animation: flickerLight 8s ease-in-out infinite;
+}
+@keyframes flickerLight {
+    0%, 92%, 94%, 100% { background: transparent; }
+    93% { background: rgba(204, 34, 34, 0.02); }
+}
+.light-mode .cyber-pulse {
+    animation: cyberPulseLight 6s ease-in-out infinite;
+}
+@keyframes cyberPulseLight {
+    0%, 100% { box-shadow: 0 0 80px 20px rgba(0, 136, 204, 0.04); }
+    50% { box-shadow: 0 0 120px 40px rgba(0, 136, 204, 0.08); }
+}
+.light-mode .cyber-scanline {
+    background: linear-gradient(90deg, transparent, rgba(0, 136, 204, 0.08), transparent);
+}
 
 /* ========== ANIMATIONS TOGGLE ========== */
 .anim-toggle {
@@ -224,7 +248,9 @@ body {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     z-index: 0; pointer-events: none; display: none;
 }
-.theme-matrix #matrixCanvas { display: block; }
+.theme-cyberpunk #matrixCanvas,
+.theme-matrix #matrixCanvas,
+.theme-hacker #matrixCanvas { display: block; }
 
 /* ========== HACKER SCANLINES ========== */
 .hacker-scanlines {

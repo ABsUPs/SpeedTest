@@ -19,8 +19,7 @@ function setTheme(name) {
     document.getElementById('themeLabel').textContent = THEMES[name].label + (isLightMode ? ' (Light)' : ' (Dark)');
     localStorage.setItem('abxspeed-theme', name);
 
-    if (name === 'matrix' && !isLightMode && animationsEnabled) { initMatrix(); }
-    else { stopMatrix(); }
+    restartMatrixIfNeeded();
 }
 
 function toggleMode() {
@@ -29,8 +28,7 @@ function toggleMode() {
     document.getElementById('themeLabel').textContent = THEMES[currentTheme].label + (isLightMode ? ' (Light)' : ' (Dark)');
     localStorage.setItem('abxspeed-light', isLightMode ? '1' : '0');
 
-    if (currentTheme === 'matrix' && !isLightMode && animationsEnabled) { initMatrix(); }
-    else { stopMatrix(); }
+    restartMatrixIfNeeded();
 }
 
 function toggleAnimations() {
@@ -39,11 +37,7 @@ function toggleAnimations() {
     localStorage.setItem('abxspeed-anim', animationsEnabled ? '1' : '0');
     showAnimStatus(animationsEnabled ? 'Animations ON' : 'Animations OFF');
 
-    if (animationsEnabled && currentTheme === 'matrix' && !isLightMode) {
-        initMatrix();
-    } else {
-        stopMatrix();
-    }
+    restartMatrixIfNeeded();
 }
 
 function setAnimations(val) {
@@ -51,11 +45,7 @@ function setAnimations(val) {
     applyTheme();
     localStorage.setItem('abxspeed-anim', animationsEnabled ? '1' : '0');
 
-    if (animationsEnabled && currentTheme === 'matrix' && !isLightMode) {
-        initMatrix();
-    } else {
-        stopMatrix();
-    }
+    restartMatrixIfNeeded();
 }
 
 function showAnimStatus(text) {
@@ -73,6 +63,34 @@ function applyTheme() {
     document.body.className = cls;
 }
 
+function restartMatrixIfNeeded() {
+    if (animationsEnabled) {
+        stopMatrix();
+        initMatrix();
+    } else {
+        stopMatrix();
+    }
+}
+
+function getMatrixColors() {
+    const themes = {
+        cyberpunk: {
+            dark: { head: 'rgba(0, 212, 255, 0.95)', trail: 'rgba(0, 140, 255, 0.6)' },
+            light: { head: 'rgba(0, 100, 180, 0.85)', trail: 'rgba(0, 136, 204, 0.4)' }
+        },
+        matrix: {
+            dark: { head: 'rgba(180, 255, 180, 0.95)', trail: 'rgba(0, 255, 65, 0.6)' },
+            light: { head: 'rgba(0, 100, 40, 0.85)', trail: 'rgba(0, 153, 51, 0.4)' }
+        },
+        hacker: {
+            dark: { head: 'rgba(255, 120, 120, 0.95)', trail: 'rgba(255, 34, 34, 0.6)' },
+            light: { head: 'rgba(180, 30, 30, 0.85)', trail: 'rgba(204, 34, 34, 0.4)' }
+        }
+    };
+    const mode = isLightMode ? 'light' : 'dark';
+    return themes[currentTheme] ? themes[currentTheme][mode] : themes.cyberpunk[mode];
+}
+
 (function() {
     const saved = localStorage.getItem('abxspeed-theme');
     const savedLight = localStorage.getItem('abxspeed-light');
@@ -86,7 +104,7 @@ function applyTheme() {
     if (activeBtn) activeBtn.classList.add('active');
     document.getElementById('themeLabel').textContent = THEMES[currentTheme].label + (isLightMode ? ' (Light)' : ' (Dark)');
 
-    if (currentTheme === 'matrix' && !isLightMode && animationsEnabled) {
+    if (animationsEnabled) {
         initMatrix();
     }
 })();
@@ -133,7 +151,9 @@ function resizeMatrix() {
 
 function drawMatrix() {
     if (!matrixActive) { mCtx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height); mAnimId = null; return; }
-    mCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    const bg = isLightMode ? 'rgba(245, 245, 245, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+    const colors = getMatrixColors();
+    mCtx.fillStyle = bg;
     mCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
     mCtx.font = mFontSize + 'px monospace';
 
@@ -142,12 +162,12 @@ function drawMatrix() {
         const x = i * mFontSize;
         const y = mColumns[i] * mFontSize;
 
-        mCtx.fillStyle = 'rgba(180, 255, 180, 0.95)';
+        mCtx.fillStyle = colors.head;
         mCtx.fillText(char, x, y);
 
         if (mColumns[i] > 1) {
             const prevChar = MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
-            mCtx.fillStyle = 'rgba(0, 255, 65, 0.6)';
+            mCtx.fillStyle = colors.trail;
             mCtx.fillText(prevChar, x, y - mFontSize);
         }
 
