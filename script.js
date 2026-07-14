@@ -74,7 +74,7 @@ let mColumns = [];
 let mFontSize = 14;
 let mAnimId = null;
 
-const MATRIX_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
+const MATRIX_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:\'",.<>?/\\~`';
 
 function initMatrix() {
     if (!matrixInited) {
