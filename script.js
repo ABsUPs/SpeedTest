@@ -31,23 +31,6 @@ function toggleMode() {
     restartMatrixIfNeeded();
 }
 
-function toggleAnimations() {
-    animationsEnabled = !animationsEnabled;
-    applyTheme();
-    localStorage.setItem('abxspeed-anim', animationsEnabled ? '1' : '0');
-    showAnimStatus(animationsEnabled ? 'Animations ON' : 'Animations OFF');
-
-    restartMatrixIfNeeded();
-}
-
-function setAnimations(val) {
-    animationsEnabled = val;
-    applyTheme();
-    localStorage.setItem('abxspeed-anim', animationsEnabled ? '1' : '0');
-
-    restartMatrixIfNeeded();
-}
-
 function showAnimStatus(text) {
     const el = document.getElementById('animStatus');
     el.textContent = text;
@@ -59,7 +42,6 @@ function showAnimStatus(text) {
 function applyTheme() {
     let cls = 'theme-' + currentTheme;
     if (isLightMode) cls += ' light-mode';
-    if (!animationsEnabled) cls += ' no-animations';
     document.body.className = cls;
 }
 
@@ -143,12 +125,8 @@ document.addEventListener('visibilitychange', function() {
 });
 
 function restartMatrixIfNeeded() {
-    if (animationsEnabled) {
-        stopMatrix();
-        initMatrix();
-    } else {
-        stopMatrix();
-    }
+    stopMatrix();
+    initMatrix();
 }
 
 function getMatrixColors() {
@@ -173,19 +151,15 @@ function getMatrixColors() {
 (function() {
     const saved = localStorage.getItem('abxspeed-theme');
     const savedLight = localStorage.getItem('abxspeed-light');
-    const savedAnim = localStorage.getItem('abxspeed-anim');
     if (saved && THEMES[saved]) currentTheme = saved;
     if (savedLight === '1') isLightMode = true;
-    if (savedAnim !== null) animationsEnabled = savedAnim === '1';
     applyTheme();
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
     const activeBtn = document.querySelector('.theme-btn[data-theme="' + currentTheme + '"]');
     if (activeBtn) activeBtn.classList.add('active');
     document.getElementById('themeLabel').textContent = THEMES[currentTheme].label + (isLightMode ? ' (Light)' : ' (Dark)');
 
-    if (animationsEnabled) {
-        initMatrix();
-    }
+    initMatrix();
 })();
 
 /* ================================================================
@@ -277,13 +251,6 @@ async function startDetection() {
     const dot = document.getElementById('statusDot');
     dot.className = 'status-dot ' + (connType === 'mobile' ? 'mobile' : 'wifi');
 
-    if (connType === 'mobile') {
-        setAnimations(false);
-        showAnimStatus('Animations OFF (Mobile Data)');
-    } else if (connType === 'wifi' || connType === 'ethernet') {
-        setAnimations(true);
-    }
-
     if (connType === 'wifi' || connType === 'ethernet') {
         status.textContent = `Detected: ${connType.toUpperCase()} — Starting tests automatically...`;
         btn.innerHTML = '⚡ Testing...';
@@ -325,13 +292,6 @@ function manualSelect(type) {
 
     document.getElementById('connectionType').textContent =
         type === 'wifi' ? '📡 WiFi' : type === 'mobile' ? '📱 Mobile Data' : '🔌 Ethernet';
-
-    if (type === 'mobile') {
-        setAnimations(false);
-        showAnimStatus('Animations OFF (Mobile Data)');
-    } else {
-        setAnimations(true);
-    }
 
     if (type === 'mobile' && dataConsent !== 'approved') {
         document.getElementById('mobileModal').classList.add('active');
