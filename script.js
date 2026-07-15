@@ -329,6 +329,11 @@ async function runAllTests() {
     if (testHistory.length > 50) testHistory.length = 50;
     localStorage.setItem('netHistory', JSON.stringify(testHistory));
     updateHistory();
+    document.querySelectorAll('.speed-gauge').forEach(g => g.style.removeProperty('--gauge-color'));
+    document.querySelectorAll('.gauge-progress').forEach(g => {
+        g.style.removeProperty('--gauge-color');
+        g.style.removeProperty('--progress');
+    });
     await testPing();
     await testDownload();
     await testUpload();
@@ -482,6 +487,16 @@ async function testDownload() {
     bar.style.width = '0%';
 }
 
+function getSpeedColor(mbps) {
+    if (mbps >= 500) return '#00ff88';
+    if (mbps >= 200) return '#00e5ff';
+    if (mbps >= 100) return '#00bbff';
+    if (mbps >= 50)  return '#4488ff';
+    if (mbps >= 20)  return '#ffaa00';
+    if (mbps >= 10)  return '#ff6622';
+    return '#ff2244';
+}
+
 function updateGauge(el, mbps) {
     let degrees;
     if (mbps <= 100) {
@@ -491,7 +506,10 @@ function updateGauge(el, mbps) {
     } else {
         degrees = 250 + Math.min((mbps - 500) / 1000, 1) * 50;
     }
+    const color = getSpeedColor(mbps);
     el.style.setProperty('--progress', Math.min(degrees, 300) + 'deg');
+    el.style.setProperty('--gauge-color', color);
+    el.closest('.speed-gauge').style.setProperty('--gauge-color', color);
 }
 
 function getSpeedRating(mbps) {

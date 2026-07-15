@@ -1,5 +1,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html { overflow-x: hidden; }
+
 /* ========== THEME: CYBERPUNK (Default) ========== */
 :root, .theme-cyberpunk {
     --bg-primary: #0a0a0f;
@@ -527,13 +529,13 @@ header { text-align: center; padding: 30px 0 10px; }
     display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 
-.gauge-value { font-size: 2.2rem; font-weight: 700; color: var(--accent); }
+.gauge-value { font-size: 2.2rem; font-weight: 700; color: var(--gauge-color, var(--accent)); }
 .gauge-unit { font-size: 0.85rem; color: var(--text-secondary); }
 
 .gauge-progress {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     border-radius: 50%;
-    background: conic-gradient(var(--accent) 0deg, var(--accent) var(--progress, 0deg), transparent var(--progress, 0deg), transparent 300deg);
+    background: conic-gradient(var(--gauge-color, var(--accent)) 0deg, var(--gauge-color, var(--accent)) var(--progress, 0deg), transparent var(--progress, 0deg), transparent 300deg);
     mask: radial-gradient(transparent 60px, black 61px, black 90px, transparent 91px);
     -webkit-mask: radial-gradient(transparent 60px, black 61px, black 90px, transparent 91px);
 }
@@ -698,5 +700,70 @@ header { text-align: center; padding: 30px 0 10px; }
 .select-btn .icon { font-size: 1.5rem; }
 
 footer { text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 0.85rem; }
+
+/* ========== RESPONSIVE: TABLET ========== */
+@media (max-width: 900px) {
+    .status-bar { gap: 8px; }
+    .status-item { padding: 6px 12px; font-size: 0.8rem; }
+}
+
+/* ========== RESPONSIVE: MOBILE ========== */
+@media (max-width: 600px) {
+    .container { padding: 15px; }
+    header { padding: 20px 0 8px; }
+    .logo { font-size: 2.2rem; }
+    .subtitle { font-size: 0.95rem; }
+    .detect-btn { padding: 16px 30px; font-size: 1.1rem; letter-spacing: 1px; }
+    .status-bar { gap: 6px; }
+    .status-item { padding: 6px 10px; font-size: 0.75rem; gap: 6px; }
+    .card { padding: 18px; }
+    .card-header { margin-bottom: 15px; }
+    .card-icon { width: 34px; height: 34px; font-size: 1rem; }
+    .card-title { font-size: 1rem; }
+    .speed-gauge { width: 150px; height: 150px; margin-bottom: 15px; }
+    .gauge-inner { width: 116px; height: 116px; }
+    .gauge-value { font-size: 1.8rem; }
+    .gauge-progress {
+        mask: radial-gradient(transparent 48px, black 49px, black 75px, transparent 76px);
+        -webkit-mask: radial-gradient(transparent 48px, black 49px, black 75px, transparent 76px);
+    }
+    .metric { padding: 10px; }
+    .metric-label { font-size: 0.65rem; }
+    .metric-value { font-size: 0.95rem; }
+    .history-table { font-size: 0.8rem; }
+    .history-table th, .history-table td { padding: 8px 6px; }
+    .modal { padding: 24px; max-width: 340px; }
+    .modal-title { font-size: 1.15rem; }
+    .select-btn { padding: 12px; font-size: 0.9rem; }
+}
+
+/* ========== RESPONSIVE: SMALL MOBILE ========== */
+@media (max-width: 400px) {
+    .container { padding: 12px; }
+    .logo { font-size: 1.8rem; }
+    .subtitle { font-size: 0.85rem; }
+    .detect-btn { padding: 14px 20px; font-size: 1rem; width: 100%; }
+    .theme-toggle { gap: 10px; }
+    .theme-btn { width: 32px; height: 32px; }
+    .status-bar { flex-direction: column; align-items: center; }
+    .status-item { width: 100%; justify-content: center; }
+    .card { padding: 15px; }
+    .speed-gauge { width: 130px; height: 130px; }
+    .gauge-inner { width: 100px; height: 100px; }
+    .gauge-value { font-size: 1.5rem; }
+    .gauge-progress {
+        mask: radial-gradient(transparent 40px, black 41px, black 65px, transparent 66px);
+        -webkit-mask: radial-gradient(transparent 40px, black 41px, black 65px, transparent 66px);
+    }
+    .metrics-grid { gap: 6px; }
+    .metric { padding: 8px; }
+    .metric-value { font-size: 0.85rem; }
+    .btn-row { flex-direction: column; }
+    .btn-row .small-btn { width: 100%; }
+    .modal { padding: 20px; max-width: 290px; }
+    .modal-buttons { flex-direction: column; }
+    .select-btns { gap: 8px; }
+    .select-btn { padding: 10px; font-size: 0.85rem; }
+}
 
 @keyframes spin { to { transform: rotate(360deg); } }
