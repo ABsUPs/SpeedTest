@@ -335,8 +335,7 @@ async function runAllTests() {
         g.style.removeProperty('--progress');
     });
     await testPing();
-    await testDownload();
-    await testUpload();
+    await Promise.all([testDownload(), testUpload()]);
     fillNetworkInfo();
 }
 
