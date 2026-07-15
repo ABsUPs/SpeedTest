@@ -636,9 +636,9 @@ function fillNetworkInfo() {
 
 function addResult(type, val) {
     const now = new Date();
-    let entry = testHistory.find(t => new Date(t.date).toDateString() === now.toDateString());
+    let entry = testHistory.find(t => t.id && t.id === now.toISOString().slice(0, 16));
     if (!entry) {
-        entry = {date: now, download:'--', upload:'--', ping:'--'};
+        entry = {id: now.toISOString().slice(0, 16), date: now, download:'--', upload:'--', ping:'--'};
         testHistory.unshift(entry);
     }
     entry[type] = val;
