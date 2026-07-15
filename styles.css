@@ -85,11 +85,17 @@
 }
 
 .light-mode.theme-cyberpunk {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
     --accent: #0088cc;
     --accent-glow: rgba(0, 136, 204, 0.15);
     --success: #00aa55;
     --warning: #dd8800;
     --danger: #dd3333;
+    --text-primary: #1a1a2e;
+    --text-secondary: #555577;
+    --border: rgba(0, 100, 180, 0.12);
     --logo-grad-a: #0088cc;
     --logo-grad-b: #00aa55;
     --btn-grad-a: #0088cc;
@@ -101,6 +107,9 @@
 }
 
 .light-mode.theme-matrix {
+    --bg-primary: #f0f5f0;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
     --accent: #009933;
     --accent-glow: rgba(0, 153, 51, 0.12);
     --success: #009933;
@@ -120,6 +129,9 @@
 }
 
 .light-mode.theme-hacker {
+    --bg-primary: #f5f0f0;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
     --accent: #cc2222;
     --accent-glow: rgba(204, 34, 34, 0.12);
     --success: #009933;
