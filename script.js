@@ -192,6 +192,7 @@ function getMatrixColors() {
    SPEED TEST LOGIC
    ================================================================ */
 let testHistory = JSON.parse(localStorage.getItem('netHistory') || '[]');
+let currentTestEntry = null;
 let connType = 'unknown';
 let dataConsent = localStorage.getItem('mobileConsent');
 updateHistory();
@@ -363,6 +364,11 @@ function closeMobileModal(approved) {
 }
 
 async function runAllTests() {
+    currentTestEntry = {date: new Date(), download:'--', upload:'--', ping:'--'};
+    testHistory.unshift(currentTestEntry);
+    if (testHistory.length > 50) testHistory.length = 50;
+    localStorage.setItem('netHistory', JSON.stringify(testHistory));
+    updateHistory();
     await testPing();
     await testDownload();
     await testUpload();
@@ -635,13 +641,13 @@ function fillNetworkInfo() {
 }
 
 function addResult(type, val) {
-    const now = new Date();
-    let entry = testHistory.find(t => t.id && t.id === now.toISOString().slice(0, 16));
-    if (!entry) {
-        entry = {id: now.toISOString().slice(0, 16), date: now, download:'--', upload:'--', ping:'--'};
+    if (currentTestEntry) {
+        currentTestEntry[type] = val;
+    } else {
+        const entry = {date: new Date(), download:'--', upload:'--', ping:'--'};
+        entry[type] = val;
         testHistory.unshift(entry);
     }
-    entry[type] = val;
     localStorage.setItem('netHistory', JSON.stringify(testHistory));
     updateHistory();
 }
@@ -652,9 +658,10 @@ function updateHistory() {
         tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-secondary)">No tests yet</td></tr>';
         return;
     }
-    tb.innerHTML = testHistory.slice(0,8).map(t => {
+    tb.innerHTML = testHistory.slice(0,10).map(t => {
+        const d = new Date(t.date);
         return `<tr>
-            <td>${new Date(t.date).toLocaleTimeString()}</td>
+            <td>${d.toLocaleDateString()}<br><small>${d.toLocaleTimeString()}</small></td>
             <td>${t.download}</td>
             <td>${t.upload}</td>
             <td>${t.ping}</td>
