@@ -675,7 +675,7 @@ header { text-align: center; padding: 30px 0 10px; }
 
 .select-btn {
     padding: 14px; border: 2px solid var(--border); border-radius: 12px;
-    background: var(--bg-secondary); color: white;
+    background: var(--bg-secondary); color: var(--text-primary);
     font-size: 1rem; font-weight: 600; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 10px;
     transition: all 0.3s ease;
