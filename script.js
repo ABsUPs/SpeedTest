@@ -306,7 +306,7 @@ async function startTestsDirectly() {
     btn.disabled = true;
     btn.className = 'detect-btn testing';
     btn.innerHTML = '⚡ Testing...';
-    status.textContent = 'Running speed tests...';
+    status.textContent = 'Running speed tests (download + upload in parallel)...';
     await runAllTests();
     btn.className = 'detect-btn done';
     btn.innerHTML = '✅ Done — Click to Test Again';
