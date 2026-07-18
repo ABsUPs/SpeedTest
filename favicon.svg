@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e1a"/>
+      <stop offset="100%" stop-color="#1a1040"/>
+    </linearGradient>
+    <linearGradient id="needle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#00ff88"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect x="0" y="0" width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- Gauge arc -->
+  <path d="M14 44 A22 22 0 0 1 50 44" fill="none" stroke="#1e3a5f" stroke-width="5" stroke-linecap="round"/>
+  <!-- Gauge filled arc -->
+  <path d="M14 44 A22 22 0 0 1 46 26" fill="none" stroke="url(#needle)" stroke-width="5" stroke-linecap="round"/>
+  <!-- Needle -->
+  <line x1="32" y1="44" x2="44" y2="26" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="32" cy="44" r="3.5" fill="#00d4ff"/>
+  <!-- Speed dots -->
+  <circle cx="14" cy="44" r="2" fill="#ff3366"/>
+  <circle cx="18" cy="33" r="2" fill="#ff6633"/>
+  <circle cx="28" cy="24" r="2" fill="#ffcc00"/>
+  <circle cx="42" cy="30" r="2" fill="#00ff88"/>
+  <circle cx="50" cy="44" r="2" fill="#00d4ff"/>
+  <!-- Lightning bolt -->
+  <polygon points="36,8 30,22 34,22 28,36 38,20 34,20" fill="#00d4ff" opacity="0.9"/>
+</svg>
