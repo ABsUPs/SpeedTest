@@ -701,6 +701,18 @@ header { text-align: center; padding: 30px 0 10px; }
 
 footer { text-align: center; padding: 40px 0; color: var(--text-secondary); font-size: 0.85rem; }
 
+.sponsor-link {
+    display: inline-block; margin-top: 10px; padding: 8px 20px;
+    border-radius: 20px; font-size: 0.9rem; font-weight: 600;
+    color: #fff; background: linear-gradient(135deg, #e44d7b, #c93a6e);
+    text-decoration: none; transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(228, 77, 123, 0.3);
+}
+.sponsor-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(228, 77, 123, 0.5);
+}
+
 /* ========== RESPONSIVE: TABLET ========== */
 @media (max-width: 900px) {
     .status-bar { gap: 8px; }
