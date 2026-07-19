@@ -547,7 +547,7 @@ async function testUpload() {
             const timeout = setTimeout(() => controller.abort(), 15000);
 
             const t0 = performance.now();
-            await fetch('https://httpbin.org/post', {
+            await fetch('https://speed.cloudflare.com/__up', {
                 method: 'POST',
                 body: data,
                 signal: controller.signal
