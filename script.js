@@ -611,9 +611,11 @@ function fillNetworkInfo() {
         const c = navigator.connection;
         document.getElementById('infoConn').textContent = c.type || c.effectiveType || 'Unknown';
         document.getElementById('infoDown').textContent = c.downlink ? c.downlink + ' Mbps' : '--';
-        document.getElementById('infoUp').textContent = c.uplink ? c.uplink + ' Mbps' : '--';
         document.getElementById('infoRTT').textContent = c.rtt ? c.rtt + ' ms' : '--';
         document.getElementById('infoSave').textContent = c.saveData ? 'Yes' : 'No';
+    }
+    if (currentTestEntry && currentTestEntry.upload && currentTestEntry.upload !== '--') {
+        document.getElementById('infoUp').textContent = currentTestEntry.upload;
     }
 }
 
