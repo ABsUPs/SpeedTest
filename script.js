@@ -610,12 +610,18 @@ function fillNetworkInfo() {
     if (navigator.connection) {
         const c = navigator.connection;
         document.getElementById('infoConn').textContent = c.type || c.effectiveType || 'Unknown';
-        document.getElementById('infoDown').textContent = c.downlink ? c.downlink + ' Mbps' : '--';
-        document.getElementById('infoRTT').textContent = c.rtt ? c.rtt + ' ms' : '--';
         document.getElementById('infoSave').textContent = c.saveData ? 'Yes' : 'No';
     }
-    if (currentTestEntry && currentTestEntry.upload && currentTestEntry.upload !== '--') {
-        document.getElementById('infoUp').textContent = currentTestEntry.upload;
+    if (currentTestEntry) {
+        if (currentTestEntry.download && currentTestEntry.download !== '--') {
+            document.getElementById('infoDown').textContent = currentTestEntry.download;
+        }
+        if (currentTestEntry.upload && currentTestEntry.upload !== '--') {
+            document.getElementById('infoUp').textContent = currentTestEntry.upload;
+        }
+        if (currentTestEntry.ping && currentTestEntry.ping !== '--') {
+            document.getElementById('infoRTT').textContent = currentTestEntry.ping;
+        }
     }
 }
 
